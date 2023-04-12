@@ -1,0 +1,823 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "6ec4cfea",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder\n",
+    "\n",
+    "# Load the dataset\n",
+    "data = pd.read_csv('TEDSA_PUF_2020.csv')\n",
+    "# print(data.head())\n",
+    "data = data.dropna()  # Drop missing values\n",
+    "data_filtered = data[['AGE', 'GENDER', 'RACE', 'MARSTAT', 'SERVICES']]\n",
+    "\n",
+    "# Handle missing values\n",
+    "# data.replace(to_replace=r'M', value=np.nan, regex=True)\n",
+    "# data.fillna(0, inplace=True)\n",
+    "\n",
+    "# Convert categorical variables to numerical variables\n",
+    "# label_encoder = LabelEncoder()\n",
+    "# data['SERVICES'] = label_encoder.fit_transform(data['SERVICES'])\n",
+    "\n",
+    "X = data_filtered.drop('SERVICES', axis=1)  # Remove target variable from input features\n",
+    "y = data_filtered['SERVICES']  # Target variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "eea8ad97",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.feature_selection import SelectKBest, f_classif\n",
+    "\n",
+    "# Feature scaling\n",
+    "scaler = StandardScaler()\n",
+    "X = scaler.fit_transform(X)\n",
+    "\n",
+    "# Feature selection\n",
+    "selector = SelectKBest(score_func=f_classif, k=2)  # Select the top 10 features\n",
+    "X_selected = selector.fit_transform(X, y)\n",
+    "\n",
+    "# Train-test split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "f8f6acb1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import tensorflow as tf\n",
+    "from tensorflow import keras\n",
+    "from tensorflow.keras import layers\n",
+    "from tensorflow.keras.models import Sequential\n",
+    "from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense\n",
+    "\n",
+    "# X = \n",
+    "# y = data.target\n",
+    "\n",
+    "# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)\n",
+    "\n",
+    "# # Preprocess the data\n",
+    "# x_train = x_train.astype(\"float32\") / 255.0\n",
+    "# x_test = x_test.astype(\"float32\") / 255.0\n",
+    "# y_train = keras.utils.to_categorical(y_train, 10)\n",
+    "# y_test = keras.utils.to_categorical(y_test, 10)\n",
+    "\n",
+    "model = Sequential() \n",
+    "model.add(Conv2D(filters=64,kernel_size=(5, 5),strides=(1, 1), padding='valid', \n",
+    "                 activation='relu',input_shape=(32, 32, 3))) \n",
+    "model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2))) \n",
+    "model.add(Conv2D(filters=32,kernel_size=(3, 3),strides=(1, 1), padding='valid', activation='relu')) \n",
+    "model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2))) \n",
+    "model.add(Conv2D(filters=32,kernel_size=(3, 3),strides=(1, 1), padding='valid', activation='relu')) \n",
+    "model.add(Flatten()) \n",
+    "model.add(Dense(64,activation='relu')) \n",
+    "model.add(Dense(10,activation='softmax')) \n",
+    "\n",
+    "#Compilemodel \n",
+    "model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])\n",
+    "model.summary()\n",
+    "\n",
+    "# import time\n",
+    "# start_time = time.time()\n",
+    "# history = model.fit(x_train, y_train, epochs=10, batch_size=64, validation_data=(x_test, y_test))\n",
+    "# end_time = time.time()\n",
+    "\n",
+    "test_loss, test_acc = model.evaluate(x_test, y_test)\n",
+    "print(\"Test accuracy:\", test_acc)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "246bdd1d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import tensorflow as tf\n",
+    "from tensorflow import keras\n",
+    "from tensorflow.keras import layers\n",
+    "from tensorflow.keras.models import Sequential\n",
+    "from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense\n",
+    "\n",
+    "# X = \n",
+    "# y = data.target\n",
+    "\n",
+    "# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)\n",
+    "\n",
+    "# # Preprocess the data\n",
+    "# x_train = x_train.astype(\"float32\") / 255.0\n",
+    "# x_test = x_test.astype(\"float32\") / 255.0\n",
+    "# y_train = keras.utils.to_categorical(y_train, 10)\n",
+    "# y_test = keras.utils.to_categorical(y_test, 10)\n",
+    "\n",
+    "model = Sequential() \n",
+    "model.add(Conv2D(filters=64,kernel_size=(5, 5),strides=(1, 1), padding='valid', \n",
+    "                 activation='relu',input_shape=(32, 32, 3))) \n",
+    "model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2))) \n",
+    "model.add(Conv2D(filters=32,kernel_size=(3, 3),strides=(1, 1), padding='valid', activation='relu')) \n",
+    "model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2))) \n",
+    "model.add(Conv2D(filters=32,kernel_size=(3, 3),strides=(1, 1), padding='valid', activation='relu')) \n",
+    "model.add(Flatten()) \n",
+    "model.add(Dense(64,activation='relu')) \n",
+    "model.add(Dense(10,activation='softmax')) \n",
+    "\n",
+    "#Compilemodel \n",
+    "model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])\n",
+    "model.summary()\n",
+    "\n",
+    "# import time\n",
+    "# start_time = time.time()\n",
+    "# history = model.fit(x_train, y_train, epochs=10, batch_size=64, validation_data=(x_test, y_test))\n",
+    "# end_time = time.time()\n",
+    "\n",
+    "test_loss, test_acc = model.evaluate(X_test, y_test)\n",
+    "print(\"Test accuracy:\", test_acc)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "16cad914",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "1480558e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train.shape\n",
+    "X_test"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "250fbf6b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "87fab83f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import tensorflow as tf\n",
+    "from tensorflow import keras\n",
+    "from tensorflow.keras import layers\n",
+    "from tensorflow.keras.models import Sequential\n",
+    "from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense\n",
+    "\n",
+    "# X = \n",
+    "# y = data.target\n",
+    "\n",
+    "# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)\n",
+    "\n",
+    "# # Preprocess the data\n",
+    "# x_train = x_train.astype(\"float32\") / 255.0\n",
+    "# x_test = x_test.astype(\"float32\") / 255.0\n",
+    "# y_train = keras.utils.to_categorical(y_train, 10)\n",
+    "# y_test = keras.utils.to_categorical(y_test, 10)\n",
+    "\n",
+    "model = Sequential() \n",
+    "model.add(Conv2D(filters=64,kernel_size=(5, 5),strides=(1, 1), padding='valid', \n",
+    "                 activation='relu',input_shape=(991449, 2))) \n",
+    "model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2))) \n",
+    "model.add(Conv2D(filters=32,kernel_size=(3, 3),strides=(1, 1), padding='valid', activation='relu')) \n",
+    "model.add(MaxPooling2D(pool_size=(2, 2), strides=(2,2))) \n",
+    "model.add(Conv2D(filters=32,kernel_size=(3, 3),strides=(1, 1), padding='valid', activation='relu')) \n",
+    "model.add(Flatten()) \n",
+    "model.add(Dense(64,activation='relu')) \n",
+    "model.add(Dense(10,activation='softmax')) \n",
+    "\n",
+    "#Compilemodel \n",
+    "model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])\n",
+    "model.summary()\n",
+    "\n",
+    "# import time\n",
+    "# start_time = time.time()\n",
+    "# history = model.fit(x_train, y_train, epochs=10, batch_size=64, validation_data=(x_test, y_test))\n",
+    "# end_time = time.time()\n",
+    "\n",
+    "test_loss, test_acc = model.evaluate(X_test, y_test)\n",
+    "print(\"Test accuracy:\", test_acc)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "4bd11d29",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder\n",
+    "\n",
+    "# Load the dataset\n",
+    "data = pd.read_csv('TEDSA_PUF_2020.csv')\n",
+    "df_sample = data.sample(n=5000, random_state=42)\n",
+    "\n",
+    "df_sample = df_sample.dropna()  # Drop missing values\n",
+    "df_filtered = df_sample[['AGE', 'GENDER', 'RACE', 'MARSTAT', 'SERVICES']]\n",
+    "\n",
+    "# Handle missing values\n",
+    "# data.replace(to_replace=r'M', value=np.nan, regex=True)\n",
+    "# data.fillna(0, inplace=True)\n",
+    "\n",
+    "# Convert categorical variables to numerical variables\n",
+    "# label_encoder = LabelEncoder()\n",
+    "# data['SERVICES'] = label_encoder.fit_transform(data['SERVICES'])\n",
+    "\n",
+    "X = data_filtered.drop('SERVICES', axis=1)  # Remove target variable from input features\n",
+    "y = data_filtered['SERVICES']  # Target variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "627e9302",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.feature_selection import SelectKBest, f_classif\n",
+    "\n",
+    "# Feature scaling\n",
+    "scaler = StandardScaler()\n",
+    "X = scaler.fit_transform(X)\n",
+    "\n",
+    "# Feature selection\n",
+    "selector = SelectKBest(score_func=f_classif, k=2)  # Select the top 10 features\n",
+    "X_selected = selector.fit_transform(X, y)\n",
+    "\n",
+    "# Train-test split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "0deac5f6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "8e7569ab",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "0fe0e31a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder\n",
+    "\n",
+    "# Load the dataset\n",
+    "data = pd.read_csv('TEDSA_PUF_2020.csv')\n",
+    "df_sample = data.sample(n=5000, random_state=42)\n",
+    "\n",
+    "df_sample = df_sample.dropna()  # Drop missing values\n",
+    "df_filtered = df_sample[['AGE', 'GENDER', 'RACE', 'MARSTAT', 'SERVICES']]\n",
+    "\n",
+    "# Handle missing values\n",
+    "# data.replace(to_replace=r'M', value=np.nan, regex=True)\n",
+    "# data.fillna(0, inplace=True)\n",
+    "\n",
+    "# Convert categorical variables to numerical variables\n",
+    "# label_encoder = LabelEncoder()\n",
+    "# data['SERVICES'] = label_encoder.fit_transform(data['SERVICES'])\n",
+    "\n",
+    "X = data_filtered.drop('SERVICES', axis=1)  # Remove target variable from input features\n",
+    "y = data_filtered['SERVICES']  # Target variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "e00115c9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_sample"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "18136f1a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder\n",
+    "\n",
+    "# Load the dataset\n",
+    "data = pd.read_csv('TEDSA_PUF_2020.csv')\n",
+    "\n",
+    "data = data.dropna()  # Drop missing values\n",
+    "data_filtered = data[['AGE', 'GENDER', 'RACE', 'MARSTAT', 'SERVICES']]\n",
+    "df_sample = data_filtered.sample(n=5500, random_state=42)\n",
+    "\n",
+    "# Handle missing values\n",
+    "# data.replace(to_replace=r'M', value=np.nan, regex=True)\n",
+    "# data.fillna(0, inplace=True)\n",
+    "\n",
+    "# Convert categorical variables to numerical variables\n",
+    "# label_encoder = LabelEncoder()\n",
+    "# data['SERVICES'] = label_encoder.fit_transform(data['SERVICES'])\n",
+    "\n",
+    "X = data_filtered.drop('SERVICES', axis=1)  # Remove target variable from input features\n",
+    "y = data_filtered['SERVICES']  # Target variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "e2c9436d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_sample"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "1db37621",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.feature_selection import SelectKBest, f_classif\n",
+    "\n",
+    "# Feature scaling\n",
+    "scaler = StandardScaler()\n",
+    "X = scaler.fit_transform(X)\n",
+    "\n",
+    "# Feature selection\n",
+    "selector = SelectKBest(score_func=f_classif, k=2)  # Select the top 10 features\n",
+    "X_selected = selector.fit_transform(X, y)\n",
+    "\n",
+    "# Train-test split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "81bddbb8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "id": "dbd37072",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.feature_selection import SelectKBest, f_classif\n",
+    "\n",
+    "# Feature scaling\n",
+    "scaler = StandardScaler()\n",
+    "X = scaler.fit_transform(X)\n",
+    "\n",
+    "# Feature selection\n",
+    "selector = SelectKBest(score_func=f_classif, k=2)  # Select the top 10 features\n",
+    "X_selected = selector.fit_transform(X, y)\n",
+    "\n",
+    "# Train-test split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "bb5f06f1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder\n",
+    "\n",
+    "# Load the dataset\n",
+    "data = pd.read_csv('TEDSA_PUF_2020.csv')\n",
+    "\n",
+    "data = data.dropna()  # Drop missing values\n",
+    "data_filtered = data[['AGE', 'GENDER', 'RACE', 'MARSTAT', 'SERVICES']]\n",
+    "df_sample = data_filtered.sample(n=5500, random_state=42)\n",
+    "\n",
+    "# Handle missing values\n",
+    "# data.replace(to_replace=r'M', value=np.nan, regex=True)\n",
+    "# data.fillna(0, inplace=True)\n",
+    "\n",
+    "# Convert categorical variables to numerical variables\n",
+    "# label_encoder = LabelEncoder()\n",
+    "# data['SERVICES'] = label_encoder.fit_transform(data['SERVICES'])\n",
+    "\n",
+    "X = df_sample.drop('SERVICES', axis=1)  # Remove target variable from input features\n",
+    "y = df_sample['SERVICES']  # Target variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "b0eeaaca",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_sample"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "1bb1f8be",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "3a35d165",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.feature_selection import SelectKBest, f_classif\n",
+    "\n",
+    "# Feature scaling\n",
+    "scaler = StandardScaler()\n",
+    "X = scaler.fit_transform(X)\n",
+    "\n",
+    "# Feature selection\n",
+    "selector = SelectKBest(score_func=f_classif, k=2)  # Select the top 10 features\n",
+    "X_selected = selector.fit_transform(X, y)\n",
+    "\n",
+    "# Train-test split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "43dc6ea6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "0fa75557",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_train.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "906dcf38",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y_test.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "213b61c8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_test.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "bd8c44f2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_test"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "ad2a640d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X_test"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "9e0fe704",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,0],X[:,1])\n",
+    "plt.xlabel(iris.feature_names[0])\n",
+    "plt.ylabel(iris.feature_names[1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "id": "15018e01",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,0],X[:,1])\n",
+    "plt.xlabel(df_sample.feature_names[0])\n",
+    "plt.ylabel(df_sample.feature_names[1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "26972d40",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,0],X[:,1])\n",
+    "plt.xlabel(df_sample['AGE'])\n",
+    "plt.ylabel(df_sample['GENDER'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "1c0fd4ee",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,1],X[:,2])\n",
+    "plt.xlabel(df_sample['AGE'])\n",
+    "plt.ylabel(df_sample['GENDER'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "366e89af",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X[:,1]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "6c85cd1c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X[:,0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "8fee7650",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X[:,2]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "554a3daf",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X[:,3]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "7bf768aa",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X[:,4]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "9d3edd25",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "id": "d7eceab5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.feature_selection import SelectKBest, f_classif\n",
+    "\n",
+    "# Feature scaling\n",
+    "scaler = StandardScaler()\n",
+    "X = scaler.fit_transform(X)\n",
+    "\n",
+    "# Feature selection\n",
+    "selector = SelectKBest(score_func=f_classif, k=2)\n",
+    "X_selected = selector.fit_transform(X, y)\n",
+    "\n",
+    "# Train-test split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 41,
+   "id": "14afd16c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,1],X[:,2])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "id": "e55dfcf4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,0],X[:,2])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "id": "a36cd785",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,0],X[:,3])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "id": "db105cc6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.model_selection import train_test_split\n",
+    "from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder\n",
+    "\n",
+    "# Load the dataset\n",
+    "data = pd.read_csv('TEDSA_PUF_2020.csv')\n",
+    "\n",
+    "data = data.dropna()  # Drop missing values\n",
+    "data_filtered = data[['AGE', 'GENDER', 'RACE', 'MARSTAT', 'SERVICES']]\n",
+    "df_sample = data_filtered.sample(n=8500, random_state=42)\n",
+    "\n",
+    "# Handle missing values\n",
+    "# data.replace(to_replace=r'M', value=np.nan, regex=True)\n",
+    "# data.fillna(0, inplace=True)\n",
+    "\n",
+    "# Convert categorical variables to numerical variables\n",
+    "# label_encoder = LabelEncoder()\n",
+    "# data['SERVICES'] = label_encoder.fit_transform(data['SERVICES'])\n",
+    "\n",
+    "X = df_sample.drop('SERVICES', axis=1)  # Remove target variable from input features\n",
+    "y = df_sample['SERVICES']  # Target variable"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "id": "547d407a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.preprocessing import StandardScaler\n",
+    "from sklearn.feature_selection import SelectKBest, f_classif\n",
+    "\n",
+    "# Feature scaling\n",
+    "scaler = StandardScaler()\n",
+    "X = scaler.fit_transform(X)\n",
+    "\n",
+    "# Feature selection\n",
+    "selector = SelectKBest(score_func=f_classif, k=2)\n",
+    "X_selected = selector.fit_transform(X, y)\n",
+    "\n",
+    "# Train-test split\n",
+    "X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size=0.3, random_state=42)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "id": "40e361b0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%notebook inline\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "plt.scatter(X[:,0],X[:,3])"
+   ]
+  }
+ ],
+ "metadata": {},
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
