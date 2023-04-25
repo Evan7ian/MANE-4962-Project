@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 TEDSA_PUF_2020.csv
+tedsa_puf_2019.csv
+tedsd_puf_2018.csv
+tedsd_puf_2019.csv
+tedsd_puf_2020.csv
